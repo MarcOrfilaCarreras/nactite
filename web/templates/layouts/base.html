@@ -1,0 +1,37 @@
+{% extends 'index.html' %}
+
+{% from 'components/navbar/navbar.html' import navbar %}
+{% from 'icons/actions/open.html' import open %}
+
+{% block page %}
+<div class="flex h-screen bg-gray-100 font-sans">
+    {{ navbar() }}
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+            <button id="toggle-sidebar" class="text-gray-500 hover:text-gray-600 lg:hidden">
+                {{ open() }}
+            </button>
+            <h1 class="ml-4 text-xl font-semibold">‎</h1>
+        </div>
+
+        <div class="md:p-6 overflow-auto">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const toggleSidebarButton = document.getElementById('toggle-sidebar');
+    const sidebar = document.getElementById('sidebar');
+    const closeSidebarButton = document.getElementById('close-sidebar');
+
+    toggleSidebarButton.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+    });
+
+    closeSidebarButton.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full');
+    });
+</script>
+{% endblock %}

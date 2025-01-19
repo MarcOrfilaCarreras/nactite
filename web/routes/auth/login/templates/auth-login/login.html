@@ -1,0 +1,23 @@
+{% extends 'index.html' %}
+
+{% from 'components/inputs/text.html' import input_text %}
+{% from 'components/buttons/primary.html' import button_primary %}
+
+{% block page %}
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <h2 class="text-center text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+        </h2>
+    </div>
+
+    <form class="flex flex-col gap-6 max-w-96 w-full mt-8" action="/auth/login" method="post">
+        <div class="flex flex-col gap-2">
+            {{ input_text('username', 'Username', 'text') }}
+            {{ input_text('password', 'Password', 'password') }}
+        </div>
+
+        {{ button_primary('Sign in', 'submit') }}
+    </form>
+</div>
+{% endblock %}

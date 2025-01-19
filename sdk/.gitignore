@@ -1,0 +1,13 @@
+# Build
+build/
+dist/
+nactite.egg-info/
+
+# Python
+.pytest_cache/
+.venv/
+__pycache__/
+
+# Development
+.env
+cache.db

@@ -1,0 +1,123 @@
+{% extends 'layouts/tabs.html' %}
+
+{% from 'components/inputs/dropdown.html' import input_dropdown %}
+{% from 'components/inputs/checkbox.html' import input_checkbox %}
+{% from 'components/calendar.html' import calendar %}
+{% from 'tools-sales/charts.html' import generate_sales_bars %}
+{% from 'tools-sales/charts.html' import generate_vendors_bars %}
+{% from 'tools-sales/charts.html' import generate_pie %}
+
+{% set tabs = ['Calendar', 'Charts'] %}
+{% set calendar_id = 'sales-calendar' %}
+{% set checkbox_compare_calendar_id = 'compare_sales_calendar' %}
+{% set store_id = 'storeDropdown' %}
+{% set year_id = 'yearDropdown' %}
+
+{% block title %}Sales{% endblock %}
+
+{% block filters %}
+<div class="w-full flex flex-col sm:flex-row gap-4">
+    {{ input_dropdown(year_id, defaults.dropdowns.years, 'selectYear()') }}
+    {{ input_dropdown(store_id, defaults.dropdowns.stores, 'selectStore()') }}
+</div>
+{% endblock %}
+
+{% block tabs_content %}
+
+<div class="flex flex-col">
+    {{ input_checkbox(checkbox_compare_calendar_id, "Compare with last year", "updateCalendar()") }}
+    {{ calendar(calendar_id, data.defaults.year) }}
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 hidden overflow-hidden gap-2">
+    {{ generate_pie('sales-by-product', 'Sales by Product', data.sales) }}
+    {{ generate_sales_bars('sales-by-month', 'Sales by Month', data.sales) }}
+    {{ generate_vendors_bars('vendors-by-month', 'Vendors by Month', data.vendors, data.areas, data.defaults.store) }}
+</div>
+
+<script>
+    const data = {{ data | tojson }};
+
+    function updateCalendar() {
+        const compareToPreSales = document.getElementById('{{ checkbox_compare_calendar_id }}').checked;
+        const salesData = data.sales;
+
+        const valuesSales = Object.values(salesData).map(item => item.ventas);
+        const maxSales = Math.max(...valuesSales);
+
+        Object.keys(salesData).forEach(function (key) {
+            const days = document.querySelectorAll(`[data-date="${key}"]`);
+            const sales = salesData[key].ventas || 0;
+            const preSales = salesData[key].prev_ventas || 0;
+
+            let bgColor;
+
+            if (compareToPreSales && 'prev_ventas' in salesData[key]) {
+                const change = ((sales - preSales) / preSales) * 100;
+
+                // Calculate opacity based on the percentage change
+                const intensity = Math.min(100, Math.abs(change));
+                const opacity = intensity / 100;
+
+                if (change >= 0) {
+                    bgColor = `rgba(34, 197, 94, ${opacity})`; // Green with gradient
+                } else {
+                    bgColor = `rgba(239, 68, 68, ${opacity})`; // Red with gradient
+                }
+            } else {
+                const intensity = Math.min(100, (sales / maxSales) * 100);
+                bgColor = `rgba(34, 197, 94, ${intensity / 100})`; // Default gradient based on sales
+            }
+
+            days.forEach(function (day) {
+                if (compareToPreSales) {
+                    day.title = `Sales ${sales} € / Previous sales ${preSales} €`;
+                } else {
+                    day.title = `Sales ${sales} €`;
+                }
+
+                day.style.backgroundColor = bgColor;
+            });
+        });
+    }
+
+    function selectStore() {
+        const selectedStore = document.getElementById("{{ store_id }}-button").getAttribute("data-id");
+
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("store", selectedStore);
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        window.location.replace(newUrl);
+    }
+
+    function selectYear() {
+        const selectedYear = document.getElementById("{{ year_id }}-button").getAttribute("data-id");
+
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("year", selectedYear);
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        window.location.replace(newUrl);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        {% for store in defaults.dropdowns.stores %}
+            {% if store.id == data.defaults.store %}
+            document.getElementById("{{ store_id }}-button").setAttribute("data-id", "{{ store.id }}");
+                document.getElementById("{{ store_id }}-selected-label").innerText = "{{ store.label }}";
+            {% endif %}
+        {% endfor %}
+
+        {% for year in defaults.dropdowns.years %}
+            {% if year.id == data.defaults.year %}
+                document.getElementById("{{ year_id }}-button").setAttribute("data-id", "{{ year.id }}");
+                document.getElementById("{{ year_id }}-selected-label").innerText = "{{ year.label }}";
+            {% endif %}
+        {% endfor %}
+
+        updateCalendar();
+    });
+</script>
+
+{% endblock %}

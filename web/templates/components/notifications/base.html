@@ -1,0 +1,29 @@
+{% macro notification_base(text, styles, icon) %}
+
+{% set random_id = "notification-" ~ range(1, 9999) | random %}
+
+<div id="{{ random_id }}" class="animate-fadeInUp absolute bottom-4 md:top-4 w-80 md:w-96 md:right-4 left-0 md:left-auto right-0 ml-auto mr-auto z-50">
+    <div class="rounded-lg text-card-foreground shadow-sm border-2 {{ styles }}">
+        <div class="flex items-center gap-3 p-4">
+            {% if icon == "error" %}
+            {% include 'icons/notifications/error.html' %}
+            {% endif %}
+
+            <p class="text-sm font-medium text-white">{{ text }}</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const notification = document.getElementById('{{ random_id }}');
+    const timer = setTimeout(() => {
+        notification.classList.remove("animate-fadeInUp");
+        notification.classList.add("animate-fadeOutUp");
+
+        notification.addEventListener('animationend', () => {
+            document.body.removeChild(notification);
+        }, { once: true });
+    }, 5000);
+</script>
+
+{% endmacro %}

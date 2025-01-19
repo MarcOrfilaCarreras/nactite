@@ -1,0 +1,13 @@
+{% macro input_date(id, styles = '') %}
+
+<div>
+    <div class="relative">
+        <input type="date" id="{{ id }}"
+            class="px-4 py-2 border rounded-md w-full h-min focus:outline-none {{ styles }}" />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Calendar class="h-5 w-5 text-gray-400" aria-hidden="true" />
+        </div>
+    </div>
+</div>
+
+{% endmacro %}

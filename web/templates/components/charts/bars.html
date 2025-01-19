@@ -1,0 +1,103 @@
+{% macro generate_bars_chart(id, chart_data) %}
+<div class="p-8 rounded-lg">
+    <div class="text-center mb-6">
+        <h1 id="{{ id }}-title" class="text-3xl font-bold text-gray-800 mb-2"></h1>
+    </div>
+    <div class="flex flex-col items-center gap-4">
+        <div class="w-full overflow-x-auto">
+            <div id="{{ id }}-chart" class="flex flex-row gap-4 items-end w-full h-full"></div>
+        </div>
+        <div class="">
+            <ul id="{{ id }}-legend" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generateBarsChart(id, data) {
+        const title = document.getElementById(`${id}-title`);
+        const chart = document.getElementById(`${id}-chart`);
+        const legend = document.getElementById(`${id}-legend`);
+        const bars = document.createElement("div");
+
+        const maxContainerHeight = 250;
+        let maxHeight = 0;
+        let scale = 1;
+
+        let previousLegend = [];
+
+        title.innerHTML = data.title;
+        bars.classList.add("flex", "flex-row", "gap-4", "items-end");
+
+        if (!data.bars || data.bars.length === 0) {
+            const noDataMessage = document.createElement("p");
+            noDataMessage.classList.add("text-[#808080]", "flex", "justify-center", "items-center", "w-full", "h-full");
+            noDataMessage.style.minHeight = "275px";
+            noDataMessage.style.fontSize = "22px";
+            noDataMessage.textContent = "No data available";
+            chart.appendChild(noDataMessage);
+            return;
+        }
+
+        data.bars.forEach(function (bar) {
+            bar.columns.forEach(function (column) {
+                if (column.value > maxHeight) {
+                    maxHeight = column.value;
+                }
+            });
+        });
+
+        while ((maxHeight * scale) >= maxContainerHeight) {
+            scale = scale * 0.90;
+        }
+
+        data.bars.forEach(function (bar) {
+            const container = document.createElement("div");
+            const columns = document.createElement("div");
+            const barTitle = document.createElement("h2");
+
+            barTitle.innerHTML = bar.title;
+            barTitle.style.textAlignLast = "center";
+            columns.classList.add("flex", "flex-row", "gap-1", "items-end", "justify-center");
+
+            bar.columns.forEach(function (column) {
+                const _column = document.createElement("div");
+
+                if (column.value == 0) {
+                    return;
+                }
+
+                _column.style.backgroundColor = column.color;
+                _column.classList.add("w-6", "rounded");
+                _column.style.height = (column.value * scale) + "px";
+
+                columns.appendChild(_column);
+
+                if (!previousLegend.includes(column.title)) {
+                    const legendItem = document.createElement('li');
+                    legendItem.className = "flex items-center";
+                    legendItem.innerHTML = `
+                    <span class="inline-block w-4 h-4 rounded-full mr-2" style="background-color: ${column.color};"></span>
+                    <span>${column.title}</span>
+                `;
+                    legend.appendChild(legendItem);
+                    previousLegend.push(column.title);
+                }
+            });
+
+            container.appendChild(columns);
+            container.appendChild(barTitle);
+
+            bars.appendChild(container);
+        });
+
+        chart.appendChild(bars);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const data = {{ chart_data | tojson
+    }};
+    generateBarsChart("{{ id }}", data);
+    });
+</script>
+{% endmacro %}

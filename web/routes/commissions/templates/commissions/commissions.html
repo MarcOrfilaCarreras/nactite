@@ -1,0 +1,108 @@
+{% extends 'layouts/table.html' %}
+
+{% from 'components/inputs/date.html' import input_date %}
+
+{% block table_title %}
+Commissions
+<div class="rounded-lg text-card-foreground shadow-sm border-2 mt-4 border-orange-400 bg-orange-400">
+    <div class="flex items-center gap-3 p-4">
+        <p>
+            {% include 'icons/notifications/error.html' %}
+        </p>
+        <p class="text-sm font-medium text-white">
+            <strong>Warning:</strong> The commissions calculated on this page are estimates only and may not reflect final payouts. Please double-check with official records before making financial decisions.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block filters %}
+{{ input_date('start-date') }}
+{{ input_date('end-date') }}
+{% endblock %}
+
+{% block headers %}
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Name</th>
+<th class="hidden sm:block px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Ratio</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Commissions</th>
+{% endblock %}
+
+{% block rows %}
+{% for key_commission, commission in data.commissions.items() %}
+<tr>
+    <td class="px-6 py-4 text-sm font-medium text-gray-900">
+        {{ key_commission }}</td>
+    <td class="hidden sm:block px-6 py-4 text-sm font-medium text-gray-900">
+        {% if commission.ratio != "" %}
+        {{ commission.ratio }} %
+        {% endif %}
+    </td>
+    <td class="px-6 py-4 text-sm font-medium text-gray-900 max-w-xs break-words overflow-hidden">
+        {% if commission.total != "" %}
+        {{ commission.total }} €
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+
+<script>
+    function setDatesRanges(startId, endId) {
+        const today = new Date();
+        const urlParams = new URLSearchParams(window.location.search);
+        const startDateParam = urlParams.get('start_date');
+        const endDateParam = urlParams.get('end_date');
+
+        function formatDate(date) {
+            var dateArr = date.split('/');
+
+            if (dateArr[0].length == 1) {
+                dateArr[0] = '0' + dateArr[0];
+            } else if (dateArr[1].length == 1) {
+                dateArr[1] = '0' + dateArr[1];
+            }
+
+            return dateArr[2] + "-" + dateArr[1] + "-" + dateArr[0];
+        }
+
+
+        if (startDateParam) {
+            document.getElementById(startId).value = startDateParam;
+        } else {
+            document.getElementById(startId).value = formatDate(new Date(today.getFullYear(), today.getMonth(), 1).toLocaleDateString());
+        }
+
+        if (endDateParam) {
+            document.getElementById(endId).value = endDateParam;
+        } else {
+            document.getElementById(endId).value = formatDate(new Date(today.getFullYear(), today.getMonth() + 1, 0).toLocaleDateString());
+        }
+    }
+
+    function filterByDate(startId, endId) {
+        const startDateInput = document.getElementById(startId).value;
+        const endDateInput = document.getElementById(endId).value;
+        const currentParams = new URLSearchParams(window.location.search);
+
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        };
+
+        currentParams.set("start_date", formatDate(startDateInput));
+        currentParams.set("end_date", formatDate(endDateInput));
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+
+        window.location.replace(newUrl);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setDatesRanges("start-date", "end-date");
+
+        document.getElementById('start-date').addEventListener('change', () => filterByDate("start-date", "end-date"));
+        document.getElementById('end-date').addEventListener('change', () => filterByDate("start-date", "end-date"));
+    });
+</script>
+{% endblock %}

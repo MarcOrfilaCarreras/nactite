@@ -1,0 +1,6 @@
+{% macro input_text(id, placeholder, type, styles = '', onkeyup = '') %}
+
+<input id="{{ id }}" name="{{ id }}" type="{{ type }}" onkeyup="{{ onkeyup }}" placeholder="{{ placeholder }}"
+    class="px-4 py-2 border rounded-md w-full h-min focus:outline-none {{ styles }}" />
+
+{% endmacro %}

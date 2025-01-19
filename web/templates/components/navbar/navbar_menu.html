@@ -1,0 +1,88 @@
+{% from 'icons/inputs/arrow_down.html' import arrow_down %}
+
+{% macro generate_menu() %}
+
+<nav class="p-4">
+    <ul class="space-y-2" id="navbar-items">
+        <li class="navbar-item">
+            <a href="" class="w-full flex items-center px-4 py-2 text-gray-700 rounded hover:bg-gray-100">
+                Leaderboards
+                {{ arrow_down() }}
+            </a>
+            <ul class="sub-navbar pl-8 mt-2 space-y-1">
+                <li>
+                    <a href="/leaderboards/stores"
+                        class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100">
+                        Stores
+                    </a>
+                </li>
+                <li>
+                    <a href="/leaderboards/vendors"
+                        class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100">
+                        Vendors
+                    </a>
+                </li>
+                <li>
+                    <a href="/leaderboards/sat" class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100">
+                        S.A.T
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="navbar-item no-sub-navbar">
+            <a href="/commissions" class="w-full flex items-center px-4 py-2 text-gray-700 rounded hover:bg-gray-100">
+                Commissions
+            </a>
+        </li>
+        <li class="navbar-item">
+            <a href="" class="w-full flex items-center px-4 py-2 text-gray-700 rounded hover:bg-gray-100">
+                Tools
+                {{ arrow_down() }}
+            </a>
+
+            <ul class="sub-navbar pl-8 mt-2 space-y-1">
+                <li>
+                    <a href="/tools/reviews" class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100">
+                        Reviews
+                    </a>
+                </li>
+                <li>
+                    <a href="/tools/sales" class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100">
+                        Sales
+                    </a>
+                </li>
+                <li>
+                    <a href="/tools/comparator" class="block px-4 py-2 text-sm text-gray-700 rounded hover:bg-gray-100">
+                        Comparator
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<script>
+    const navbarItems = document.querySelectorAll('.navbar-item');
+    navbarItems.forEach(item => {
+        const button = item.querySelector('a');
+        const subNavbar = item.querySelector('.sub-navbar');
+        const arrowIcon = button.querySelector('svg:last-of-type');
+
+        if (subNavbar) {
+            subNavbar.classList.remove('hidden');
+            arrowIcon.classList.add('rotate-180');
+        }
+
+        if (item.classList.contains('no-sub-navbar')) {
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            event.preventDefault();
+            subNavbar.classList.toggle('hidden');
+            arrowIcon.classList.toggle('rotate-180');
+        });
+    });
+</script>
+
+{% endmacro %}

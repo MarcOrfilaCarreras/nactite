@@ -1,0 +1,5 @@
+{% from 'components/notifications/base.html' import notification_base %}
+
+{% macro notification_error(text) %}
+    {{ notification_base(text, 'border-red-500 bg-red-500', 'error') }}
+{% endmacro %}

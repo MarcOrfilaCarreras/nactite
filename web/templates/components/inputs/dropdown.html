@@ -1,0 +1,55 @@
+{% from 'icons/inputs/arrow_down.html' import arrow_down %}
+
+{% macro input_dropdown(id, dropdown_items, callback = '') %}
+<div id="{{id}}" class="relative">
+    <button id="{{id}}-button"
+        class="flex items-center justify-between w-full px-4 py-2 text-left bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+        data-id="{{ dropdown_items[0].id }}">
+        <span id="{{id}}-selected-label">{{ dropdown_items[0].label }}</span>
+        {{ arrow_down() }}
+    </button>
+    <div id="{{id}}-menu"
+        class="z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden absolute left-0 top-full mt-1"
+        role="listbox">
+        <ul id="{{id}}-items" class="w-full py-1 overflow-auto max-h-60">
+            {% for item in dropdown_items %}
+            <li>
+                <button class="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                    data-id="{{ item.id }}">
+                    {{ item.label }}
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<script>
+    const dropdownButton_{{ id }} = document.getElementById('{{ id }}-button');
+    const dropdownMenu_{{ id }} = document.getElementById('{{ id }}-menu');
+    const dropdownItems_{{ id }} = document.querySelectorAll("#{{ id }}-menu button");
+
+    dropdownButton_{{ id }}.addEventListener('click', () => {
+        dropdownMenu_{{ id }}.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!dropdownMenu_{{ id }}.contains(event.target) && !dropdownButton_{{ id }}.contains(event.target)) {
+            dropdownMenu_{{ id }}.classList.add('hidden');
+        }
+    });
+
+    dropdownItems_{{ id }}.forEach(item => {
+        item.addEventListener('click', (event) => {
+            const selectedLabel = document.getElementById('{{ id }}-selected-label');
+            const selectedButton = document.getElementById('{{id}}-button');
+            selectedLabel.textContent = item.textContent;
+            selectedButton.setAttribute('data-id', item.getAttribute('data-id'));
+
+            dropdownMenu_{{ id }}.classList.toggle('hidden');
+
+            {{ callback | safe }};
+        });
+    });
+</script>
+{% endmacro %}

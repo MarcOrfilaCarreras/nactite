@@ -1,0 +1,24 @@
+{% from 'components/navbar/navbar_menu.html' import generate_menu %}
+{% from 'icons/actions/close.html' import close %}
+
+{% macro navbar() %}
+<aside id="sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out -translate-x-full lg:relative lg:translate-x-0">
+
+    <div class="flex flex-row gap-4 p-4 border-b border-gray-200">
+        <button id="close-sidebar" class="lg:hidden text-gray-500 hover:text-gray-600 focus:outline-none">
+            {{ close() }}
+        </button>
+        <a href="/" class="text-xl font-semibold">Menu</a>
+    </div>
+
+    {{ generate_menu() }}
+
+    <form action="/auth/logout" method="post" class="absolute bottom-0 w-full p-4">
+        <button
+            class="flex items-center justify-center w-full px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+            Logout
+        </button>
+    </form>
+</aside>
+{% endmacro %}

@@ -1,0 +1,184 @@
+{% from 'components/charts/bars.html' import generate_bars_chart %}
+{% from 'components/charts/pie.html' import generate_pie_chart %}
+
+{% macro generate_sales_bars(id, title, sales) %}
+
+{% set colors = [
+    "#0369A1", "#0891B2", "#0D9488", "#10B981", "#4ADE80",
+    "#84CC16", "#FACC15", "#FB923C", "#F97316", "#DC2626",
+    "#9333EA", "#6B7280", "#3B82F6", "#2563EB", "#1E40AF",
+    "#64748B", "#7DD3FC", "#0EA5E9", "#0284C7", "#0284C7"
+] %}
+
+{% set processed = dict() %}
+{% set monthly_sales = dict() %}
+{% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+
+{% set x = processed.__setitem__("title", title) %}
+{% set x = processed.__setitem__("bars", []) %}
+
+{% for key, day in sales.items() %}
+    {% set month_num = key.split('-')[1] %}
+
+    {% set month_index = month_num | int - 1 %}
+
+    {% if month_num not in monthly_sales %}
+        {% set x = monthly_sales.__setitem__(month_num, {"Current": 0, "Previous": 0, "month_name": months[month_index]}) %}
+    {% endif %}
+
+    {% set x = monthly_sales[month_num].__setitem__("Current", monthly_sales[month_num].Current + day.ventas) %}
+    {% set x = monthly_sales[month_num].__setitem__("Previous", monthly_sales[month_num].Previous + day.prev_ventas) %}
+{% endfor %}
+
+{% for month_num, totals in monthly_sales.items() %}
+    {% if totals.Current > 0 or totals.Previous > 0 %}
+        {% set x = processed.bars.append({"title": totals.month_name, "columns": [{"title": "Current Year", "value": totals.Current, "color": colors[0]},{"title": "Previous Year", "value": totals.Previous, "color": colors[1]}]}) %}
+    {% endif %}
+{% endfor %}
+
+{{ generate_bars_chart(id, processed) }}
+
+{% endmacro %}
+
+{% macro generate_pie(id, title, sales) %}
+
+{% set colors = [
+    "#0369A1", "#0891B2", "#0D9488", "#10B981", "#4ADE80",
+    "#84CC16", "#FACC15", "#FB923C", "#F97316", "#DC2626",
+    "#9333EA", "#6B7280", "#3B82F6", "#2563EB", "#1E40AF",
+    "#64748B", "#7DD3FC", "#0EA5E9", "#0284C7", "#0284C7"
+] %}
+
+{% set processed = {"title": title or "", "slices": []} %}
+
+{% set total_cpu = namespace(value=0) %}
+{% set total_ipad = namespace(value=0) %}
+{% set total_iphone = namespace(value=0) %}
+{% set total_watch = namespace(value=0) %}
+{% set total_airpods = namespace(value=0) %}
+{% set total_sales = namespace(value=0) %}
+{% set total_other = namespace(value=0) %}
+
+{% for key, day in sales.items() %}
+    {% set total_cpu.value = total_cpu.value + day.ventas_cpu %}
+    {% set total_ipad.value = total_ipad.value + day.ventas_ipad %}
+    {% set total_iphone.value = total_iphone.value + day.ventas_iphone %}
+    {% set total_watch.value = total_watch.value + day.ventas_watch %}
+    {% set total_airpods.value = total_airpods.value + day.ventas_airpods %}
+    {% set total_sales.value = total_sales.value + day.ventas %}
+{% endfor %}
+
+{% set total_other.value = total_sales.value - (total_cpu.value + total_ipad.value + total_iphone.value + total_watch.value + total_airpods.value) %}
+
+{% if total_sales.value > 0 %}
+    {% set slice = {
+        "title": "Mac",
+        "value": (total_cpu.value / total_sales.value) * 100,
+        "color": colors[0]
+    } %}
+    {% set x = processed["slices"].append(slice) %}
+
+    {% set slice = {
+        "title": "iPad",
+        "value": (total_ipad.value / total_sales.value) * 100,
+        "color": colors[1]
+    } %}
+    {% set x = processed["slices"].append(slice) %}
+
+    {% set slice = {
+        "title": "iPhone",
+        "value": (total_iphone.value / total_sales.value) * 100,
+        "color": colors[2]
+    } %}
+    {% set x = processed["slices"].append(slice) %}
+
+    {% set slice = {
+        "title": "Watch",
+        "value": (total_watch.value / total_sales.value) * 100,
+        "color": colors[3]
+    } %}
+    {% set x = processed["slices"].append(slice) %}
+
+    {% set slice = {
+        "title": "AirPods",
+        "value": (total_airpods.value / total_sales.value) * 100,
+        "color": colors[4]
+    } %}
+    {% set x = processed["slices"].append(slice) %}
+
+    {% set slice = {
+        "title": "Other",
+        "value": (total_other.value / total_sales.value) * 100,
+        "color": colors[5]
+    } %}
+    {% set x = processed["slices"].append(slice) %}
+{% endif %}
+
+{{ generate_pie_chart(id, processed) }}
+{% endmacro %}
+
+{% macro generate_vendors_bars(id, title, vendors_sales, areas_sales, deafult_area) %}
+
+{% set colors = [
+    "#0369A1", "#0891B2", "#0D9488", "#10B981", "#4ADE80",
+    "#84CC16", "#FACC15", "#FB923C", "#F97316", "#DC2626",
+    "#9333EA", "#6B7280", "#3B82F6", "#2563EB", "#1E40AF",
+    "#64748B", "#7DD3FC", "#0EA5E9", "#0284C7", "#0284C7"
+] %}
+
+{% set processed = dict() %}
+
+{% set x = processed.__setitem__("title", title) %}
+{% set x = processed.__setitem__("bars", []) %}
+
+{% set biggest_color_index = namespace(value=0) %}
+
+{% for key, month in vendors_sales.items() %}
+    {% set month_entry = {"title": key, "columns": []} %}
+
+    {% set color_index = namespace(value=0) %}
+
+    {% for vendor_key, vendor in month.items() %}
+        {% if vendor.area == deafult_area and vendor.ventas > 0 %}
+            {% set x = month_entry["columns"].append({
+                "title": vendor.nombre,
+                "value": vendor.ventas,
+                "color": colors[color_index.value]
+            }) %}
+
+            {% set color_index.value = color_index.value + 1 %}
+
+            {% if biggest_color_index.value <= color_index.value %}
+                {% set biggest_color_index.value = color_index.value %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {% if month_entry["columns"] | length > 0 %}
+        {% set x = processed.bars.append(month_entry) %}
+    {% endif %}
+{% endfor %}
+
+{% set biggest_color_index.value = biggest_color_index.value + 1 %}
+
+{% for month_key, month in areas_sales.items() %}
+    {% for item in processed["bars"] %}
+        {% if month_key == item.title %}
+            {% set vendors_sales = namespace(value=0) %}
+
+            {% for column in processed["bars"][loop.index - 1]["columns"] %}
+                {% set vendors_sales.value = vendors_sales.value + column.value %}
+            {% endfor %}
+
+            {% set x = processed["bars"][loop.index - 1]["columns"].append({
+                "title": "Others",
+                "value": month[deafult_area].ventas - vendors_sales.value,
+                "color": colors[biggest_color_index.value]
+            }) %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+
+{{ generate_bars_chart(id, processed) }}
+
+{% endmacro %}

@@ -1,0 +1,36 @@
+{% macro pretiffy_ranking(index) %}
+{% if index == 1 %}
+<span>🥇</span>
+{% elif index == 2 %}
+<span>🥈</span>
+{% elif index == 3 %}
+<span>🥉</span>
+{% else %}
+<span>{{ index }}</span>
+{% endif %}
+{% endmacro %}
+
+{% macro vendors_images(area, vendors) %}
+<div class="flex flex-row gap-2 overflow-auto">
+    {% for key_vendor, vendor in vendors %}
+    {% if vendor.area == area %}
+    <img loading="lazy" src="https://intranet.intecat.com/avatar.php?id={{vendor.codvendedor}}"
+        class="rounded-full w-8 h-8" alt="" title="{{ vendor.nombre }}">
+    {% endif %}
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro calculate_growth(sales, prev_sales) %}
+{% if sales > 0 and prev_sales > 0 %}
+{% if sales > prev_sales %}
+<span class="bg-green-100 text-green-600 py-1 px-2 rounded-full text-xs">+{{
+    (((prev_sales -
+    sales) / prev_sales) * 100) | round | int | abs }}%</span>
+{% else %}
+<span class="bg-red-100 text-red-600 py-1 px-2 rounded-full text-xs">-{{
+    (((prev_sales -
+    sales) / prev_sales) * 100) | round | int | abs }}%</span>
+{% endif %}
+{% endif %}
+{% endmacro %}

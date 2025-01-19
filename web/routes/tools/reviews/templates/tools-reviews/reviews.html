@@ -1,0 +1,61 @@
+{% extends 'layouts/table.html' %}
+
+{% from 'components/inputs/dropdown.html' import input_dropdown %}
+
+{% set store_id = 'storeDropdown' %}
+
+{% block table_title %}Reviews{% endblock %}
+
+{% block filters %}
+<div class="w-full sm:w-52">
+    {{ input_dropdown(store_id, defaults.dropdowns.stores, 'selectStore()') }}
+</div>
+{% endblock %}
+
+{% block headers %}
+<th class="hidden sm:block px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Date</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Rating</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Text</th>
+{% endblock %}
+
+{% block rows %}
+{% for review in data.reviews %}
+<tr>
+    <td class="hidden sm:block px-6 py-4 text-sm font-medium text-gray-900">
+        {{ review.timestamp }}</td>
+    <td class="px-6 py-4 text-sm font-medium text-gray-900">
+        {{ review.rating }}</td>
+    <td class="px-6 py-4 text-sm font-medium text-gray-900 max-w-xs break-words overflow-hidden">
+        {{ review.text }}
+    </td>
+</tr>
+{% endfor %}
+
+<script>
+
+    let selectedStore = "{{ data.defaults.store }}";
+
+    function selectStore() {
+        selectedStore = document.getElementById("{{ store_id }}-button").getAttribute("data-id");
+
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("store", selectedStore);
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        window.location.replace(newUrl);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        {% for store in defaults.dropdowns.stores %}
+            {% if store.id == data.defaults.store %}
+                document.getElementById("{{ store_id }}-selected-label").innerText = "{{ store.label }}";
+                document.getElementById("{{ store_id }}-button").setAttribute("data-id", selectedStore ? selectedStore : "{{store.id }}");
+            {% endif %}
+        {% endfor %}
+    });
+
+</script>
+{% endblock %}

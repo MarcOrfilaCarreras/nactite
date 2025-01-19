@@ -1,0 +1,5 @@
+{% from 'components/buttons/base.html' import button_base %}
+
+{% macro button_primary(text, type) %}
+    {{ button_base(text, '!text-white !bg-blue-600 hover:!bg-blue-700', type) }}
+{% endmacro %}

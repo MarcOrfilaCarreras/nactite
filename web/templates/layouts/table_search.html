@@ -1,0 +1,47 @@
+{% extends 'layouts/base.html' %}
+
+{% from 'components/inputs/text.html' import input_text %}
+
+{% set table_id = "table-" ~ range(1, 9999) | random %}
+
+{% block content %}
+<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 relative">
+    <div class="container mx-auto px-6 py-8">
+        <h2 class="text-2xl font-semibold mb-4">{% block title %}{% endblock %}</h2>
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="overflow-x-auto m-6">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6 max-w-[1000px]">
+                    {% block filters %}{% endblock %}
+                    {{ input_text('search', 'Search ...', 'text', onkeyup = 'filterTable()') }}
+                </div>
+                {% block table %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById('search');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById("{{ table_id }}");
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName('td');
+            let rowText = '';
+
+            for (let j = 0; j < cells.length; j++) {
+                rowText += cells[j].textContent.toLowerCase();
+            }
+
+            if (rowText.indexOf(filter) > -1) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+</script>
+
+{% endblock %}

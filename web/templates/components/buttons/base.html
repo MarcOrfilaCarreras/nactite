@@ -1,0 +1,8 @@
+{% macro button_base(text, styles, type) %}
+
+<button type="{{ type }}"
+    class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-center hover:bg-gray-50 focus:outline-none {{ styles }}">
+    {{ text}}
+</button>
+
+{% endmacro %}

@@ -1,0 +1,148 @@
+{% extends 'layouts/table.html' %}
+
+{% from 'utils/tables.html' import pretiffy_ranking %}
+{% from 'utils/tables.html' import vendors_images %}
+{% from 'utils/tables.html' import calculate_growth %}
+{% from 'components/inputs/date.html' import input_date %}
+{% from 'components/popups/base.html' import popup_base %}
+{% from 'components/popups/base.html' import popup_base_controller %}
+
+{% block table_title %}Stores{% endblock %}
+
+{% block table_filters %}
+{{ input_date('start-date') }}
+{{ input_date('end-date') }}
+{% endblock %}
+
+{% block headers %}
+<th class="hidden sm:block px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Rank</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Store</th>
+<th class="hidden lg:block px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Team</th>
+<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Sales</th>
+<th class="hidden md:block px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    Action</th>
+{% endblock %}
+
+{% block rows %}
+{% for key_store, store in data.stores.items() %}
+<tr>
+    <td class="hidden sm:block px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        {{ pretiffy_ranking(loop.index) }}
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        {{ store.nombre }}
+    </td>
+
+    <td class="hidden lg:block px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {{ vendors_images(key_store, data.vendors.items()) }}
+    </td>
+
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+        {{ store.ventas }}
+        {{ calculate_growth(store.ventas, store.prev_ventas) }}
+    </td>
+
+    <td class="hidden md:block px-6 py-4 whitespace-nowrap text-sm font-medium">
+        <button class="text-blue-600 hover:text-blue-900 focus:outline-none focus:underline"
+            onclick="openModal('{{ key_store }}')">
+            View Details
+        </button>
+    </td>
+
+    {% set details = [
+        {
+            "title": "Product Sales",
+            "columns": [
+                {"label": "Mac", "value": store.cpu},
+                {"label": "iPad", "value": store.ipad},
+                {"label": "iPhone", "value": store.iphone},
+                {"label": "Watch", "value": store.watch},
+                {"label": "AirPods", "value": store.airpods},
+                {
+                    "label": "Acc. Apple",
+                    "value": {"text": store.accesorios_apple, "percentage": store.ventas_accesorios_apple / store.ventas * 100 if store.ventas != 0 else 0},
+                },
+                {
+                    "label": "Acc. 3PP",
+                    "value": {"text": store.accesorios_3pp, "percentage": store.ventas_accesorios_3pp / store.ventas * 100 if store.ventas != 0 else 0},
+                },
+            ],
+        },
+        {
+            "title": "Additional Information",
+            "columns": [
+                {"label": "Insurances", "value": store.seguros_garante},
+                {
+                    "label": "Financing",
+                    "value": {"text": store.financiacion, "percentage": store.financiacion / store.num_tickets * 100 if store.num_tickets != 0 else 0},
+                },
+                {
+                    "label": "Setups",
+                    "value": {"text": store.horas, "percentage": store.horas / store.iphone * 100 if store.iphone != 0 else 0},
+                },
+                {"label": "Tickets", "value": store.num_tickets}
+            ],
+        },
+    ] %}
+
+    {{ popup_base(key_store, sections = details) }}
+</tr>
+{% endfor %}
+
+{{ popup_base_controller() }}
+
+<script>
+    function setDatesRanges(startId, endId) {
+        const today = new Date().toISOString().split('T')[0];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const startDateParam = urlParams.get('start_date');
+        const endDateParam = urlParams.get('end_date');
+
+        if (startDateParam) {
+            document.getElementById(startId).value = startDateParam;
+        } else {
+            document.getElementById(startId).value = today;
+        }
+
+        if (endDateParam) {
+            document.getElementById(endId).value = endDateParam;
+        } else {
+            document.getElementById(endId).value = today;
+        }
+
+        document.getElementById(startId).max = today;
+        document.getElementById(endId).max = today;
+    }
+
+    function filterByDate(startId, endId) {
+        const startDateInput = document.getElementById(startId).value;
+        const endDateInput = document.getElementById(endId).value;
+        const currentParams = new URLSearchParams(window.location.search);
+
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        };
+
+        currentParams.set("start_date", formatDate(startDateInput));
+        currentParams.set("end_date", formatDate(endDateInput));
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+
+        window.location.replace(newUrl);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setDatesRanges("start-date", "end-date");
+
+        document.getElementById('start-date').addEventListener('change', () => filterByDate("start-date", "end-date"));
+        document.getElementById('end-date').addEventListener('change', () => filterByDate("start-date", "end-date"));
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% macro calendar(id, year = 2024) %}
+
+<div id="{{ id }}"
+    class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4 overflow-x-auto"></div>
+
+<script>
+    const calendarElement = document.getElementById('{{ id }}');
+
+    function createMonthCalendar(month, year) {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const lastDayOfMonth = new Date(year, month, daysInMonth).getDay();
+
+        const adjustedFirstDay = (firstDayOfMonth + 6) % 7;
+
+        const monthElement = document.createElement('div');
+        monthElement.className = 'm-1 p-1 bg-white';
+
+        const header = document.createElement('div');
+        header.className = 'text-center font-bold mb-1';
+        header.textContent = new Date(year, month).toLocaleString('en', { month: 'long' }) + ' ' + year;
+        monthElement.appendChild(header);
+
+        let dayRow = document.createElement('div');
+        dayRow.className = 'flex flex-wrap mb-0.5 justify-center';
+
+        for (let i = 0; i < adjustedFirstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'w-10 h-10 inline-flex items-center justify-center border border-gray-200 m-0.5 rounded text-xs';
+            dayRow.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+            const dayElement = document.createElement('div');
+            dayElement.className = 'w-10 h-10 inline-flex items-center justify-center border border-gray-200 m-0.5 rounded text-xs';
+            dayElement.textContent = day;
+            dayElement.setAttribute("data-date", dateString);
+            dayRow.appendChild(dayElement);
+
+            if ((adjustedFirstDay + day) % 7 === 0) {
+                monthElement.appendChild(dayRow);
+                dayRow = document.createElement('div');
+                dayRow.className = 'flex flex-wrap mb-0.5 justify-center';
+            }
+        }
+
+        for (let i = (lastDayOfMonth + 6) % 7; i < 6; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'w-10 h-10 inline-flex items-center justify-center border border-gray-200 m-0.5 rounded text-xs';
+            dayRow.appendChild(emptyCell);
+        }
+        monthElement.appendChild(dayRow);
+
+        calendarElement.appendChild(monthElement);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        for (let month = 0; month < 12; month++) {
+            createMonthCalendar(month, "{{ year }}");
+        }
+    });
+</script>
+
+{% endmacro %}

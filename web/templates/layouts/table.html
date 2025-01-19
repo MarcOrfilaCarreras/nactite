@@ -1,0 +1,20 @@
+{% extends 'layouts/table_search.html' %}
+
+{% block title %}{% block table_title %}{% endblock %}
+{% endblock %}
+
+{% block filters %}{% block table_filters %}{% endblock %}
+{% endblock %}
+
+{% block table %}
+<table class="min-w-full divide-y divide-gray-200" id="{{ table_id }}">
+    <thead class="bg-gray-50">
+        <tr>
+            {% block headers %}{% endblock %}
+        </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+        {% block rows %}{% endblock %}
+    </tbody>
+</table>
+{% endblock %}

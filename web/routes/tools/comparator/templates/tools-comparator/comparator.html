@@ -1,0 +1,233 @@
+{% extends 'layouts/tabs.html' %}
+
+{% from 'components/inputs/date.html' import input_date %}
+{% from 'components/inputs/dropdown.html' import input_dropdown %}
+
+{% set tabs = ['Vendors', 'Stores'] %}
+{% set vendor_1_id = 'vendors1' %}
+{% set vendor_2_id = 'vendors2' %}
+{% set vendor_3_id = 'vendors3' %}
+{% set store_1_id = 'stores1' %}
+{% set store_2_id = 'stores2' %}
+{% set store_3_id = 'stores3' %}
+{% set option_id = 'optionsDropdown' %}
+
+
+{% block title %}Comparator{% endblock %}
+
+{% block filters %}
+{{ input_date('start-date') }}
+{{ input_date('end-date') }}
+{{ input_dropdown("optionsDropdown", defaults.dropdowns.products, 'selectOption()') }}
+{% endblock %}
+
+{% block tabs_content %}
+
+<div class="flex flex-col">
+    <table id="vendors-table" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="hidden w-1/4 md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500">
+                </th>
+                <th id="vendors-table-vendor-1-label"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 align-bottom">
+                    {{ input_dropdown(vendor_1_id, defaults.dropdowns.vendors, 'selectedItemsChanged("vendors")') }}
+                </th>
+                <th id="vendors-table-vendor-2-label"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 align-bottom">
+                    {{ input_dropdown(vendor_2_id, defaults.dropdowns.vendors, 'selectedItemsChanged("vendors")') }}
+                </th>
+                <th id="vendors-table-vendor-3-label"
+                    class="hidden sm:block px-6 py-3 text-left text-xs font-medium text-gray-500 align-bottom">
+                    {{ input_dropdown(vendor_3_id, defaults.dropdowns.vendors, 'selectedItemsChanged("vendors")') }}
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200" id="vendors-table-body">
+        </tbody>
+    </table>
+</div>
+
+<div class="flex flex-col hidden">
+    <table id="stores-table" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="hidden w-1/4 md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500">
+                </th>
+                <th id="stores-table-store-1-label"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 align-bottom">
+                    {{ input_dropdown(store_1_id, defaults.dropdowns.stores, 'selectedItemsChanged("stores")') }}
+                </th>
+                <th id="stores-table-store-2-label"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 align-bottom">
+                    {{ input_dropdown(store_2_id, defaults.dropdowns.stores, 'selectedItemsChanged("stores")') }}
+                </th>
+                <th id="stores-table-store-3-label"
+                    class="hidden sm:block px-6 py-3 text-left text-xs font-medium text-gray-500 align-bottom">
+                    {{ input_dropdown(store_3_id, defaults.dropdowns.stores, 'selectedItemsChanged("stores")') }}
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200" id="stores-table-body">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const data = {{ data | tojson }};
+
+    let selectedItems = {
+        "vendors": {},
+        "stores": {}
+    };
+    const options = {
+        "apple-care": "AppleCare +",
+        "rockglass": "Rockglass"
+    };
+    let selectedOption = "apple-care";
+
+    function getDefaultOption() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const optionParam = urlParams.get('option');
+
+        if (optionParam && optionParam === 'apple-care') {
+            selectedOption = "apple-care";
+            return "AppleCare +";
+        }
+
+        if (optionParam && optionParam === 'rockglass') {
+            selectedOption = "rockglass";
+            return "Rockglass";
+        }
+
+        selectedOption = "apple-care";
+        return "AppleCare +";
+    }
+
+    function selectOption() {
+        selectedOption = document.getElementById("{{ option_id }}-button").getAttribute("data-id");
+
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("option", selectedOption);
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        window.location.replace(newUrl);
+    }
+
+    function selectItem(id, label, entity, type) {
+        document.getElementById(id + '-selected-label').innerText = label;
+        document.getElementById(id + '-button').setAttribute("data-id", entity);
+
+        selectedItems[type][id] = entity;
+        updateTable(type);
+    }
+
+    function selectedItemsChanged(type) {
+        selectedItems[type][type + "1"] = document.getElementById(type + "1-button").getAttribute("data-id");
+        selectedItems[type][type + "2"] = document.getElementById(type + "2-button").getAttribute("data-id");
+        selectedItems[type][type + "3"] = document.getElementById(type + "3-button").getAttribute("data-id");
+        updateTable(type);
+    }
+
+    const generateColumn = function (label, value, css = '') {
+        return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${css}"><span class="flex flex-col"><p>${value}</p><p class="md:hidden"><strong>${label}</strong></p></span></td>`;
+    }
+
+    function updateTable(type) {
+        const tableBody = document.getElementById(type + "-table-body");
+        tableBody.innerHTML = '';
+
+        const selectedEntities = data[type];
+        const categories = [{ id: "cpu", label: "Mac" }, { id: "ipad", label: "iPad" }, { id: "iphone", label: "iPhone" }, { id: "watch", label: "Watch" }, { id: "airpods", label: "AirPods" }, { id: "accesorios_apple", label: "Acc. Apple" }, { id: "accesorios_3pp", label: "Acc. 3PP" }, { id: "seguros_garante", label: "Insurances" }, { id: "financiacion", label: "Financing" }, { id: "horas", label: "Setups" }, { id: "num_tickets", label: "Tickets" }, { id: "personalizado", label: selectedOption ? options[selectedOption] : "Personalizado" }];
+
+        categories.forEach(category => {
+            const row = document.createElement('tr');
+
+            row.innerHTML = generateColumn("", category.label, "hidden md:block") +
+                generateColumn(category.label, selectedEntities[selectedItems[type][type + "1"]][category.id]) +
+                generateColumn(category.label, selectedEntities[selectedItems[type][type + "2"]][category.id]) +
+                generateColumn(category.label, selectedEntities[selectedItems[type][type + "3"]][category.id], "hidden sm:block");
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const vendorIdsInDefaultArea = Object.entries(data["vendors"])
+            .filter(([id, vendor]) => vendor.area === "{{ data.defaults.store }}")
+            .map(([id]) => id);
+        const vendorIdsNotInDefaultArea = Object.keys(data["vendors"]).filter(id => !vendorIdsInDefaultArea.includes(id));
+
+        document.getElementById("{{ option_id }}-selected-label").innerText = getDefaultOption();
+        document.getElementById("{{ option_id }}-button").setAttribute("data-id", selectedOption);
+
+        selectedItems["vendors"]["vendors1"] = "{{ data.defaults.vendor }}";
+        selectedItems["vendors"]["vendors2"] = vendorIdsInDefaultArea.find(id => id !== selectedItems["vendors"]["vendors1"])
+            || vendorIdsNotInDefaultArea.find(id => id !== selectedItems["vendors"]["vendors1"]);
+        selectedItems["vendors"]["vendors3"] = vendorIdsInDefaultArea.find(id => id !== selectedItems["vendors"]["vendors1"] && id !== selectedItems["vendors"]["vendors2"])
+            || vendorIdsNotInDefaultArea.find(id => id !== selectedItems["vendors"]["vendors1"] && id !== selectedItems["vendors"]["vendors2"]);
+
+        selectedItems["stores"]["stores1"] = "{{ data.defaults.store }}";
+        selectedItems["stores"]["stores2"] = "{{ defaults.dropdowns.stores[0].id }}";
+        selectedItems["stores"]["stores3"] = "{{ defaults.dropdowns.stores[1].id }}";
+
+        selectItem("vendors1", data["vendors"][selectedItems["vendors"]["vendors1"]]["nombre"], selectedItems["vendors"]["vendors1"], "vendors");
+        selectItem("vendors2", data["vendors"][selectedItems["vendors"]["vendors2"]]["nombre"], selectedItems["vendors"]["vendors2"], "vendors");
+        selectItem("vendors3", data["vendors"][selectedItems["vendors"]["vendors3"]]["nombre"], selectedItems["vendors"]["vendors3"], "vendors");
+
+        selectItem("stores1", data["stores"][selectedItems["stores"]["stores1"]]["nombre"], selectedItems["stores"]["stores1"], "stores");
+        selectItem("stores2", data["stores"][selectedItems["stores"]["stores2"]]["nombre"], selectedItems["stores"]["stores2"], "stores");
+        selectItem("stores3", data["stores"][selectedItems["stores"]["stores3"]]["nombre"], selectedItems["stores"]["stores3"], "stores");
+    });
+</script>
+
+<script>
+    function setDatesRanges(startId, endId) {
+        const today = new Date().toISOString().split('T')[0];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const startDateParam = urlParams.get('start_date');
+        const endDateParam = urlParams.get('end_date');
+
+        if (startDateParam) {
+            document.getElementById(startId).value = startDateParam;
+        } else {
+            document.getElementById(startId).value = today;
+        }
+
+        if (endDateParam) {
+            document.getElementById(endId).value = endDateParam;
+        } else {
+            document.getElementById(endId).value = today;
+        }
+
+        document.getElementById(startId).max = today;
+        document.getElementById(endId).max = today;
+    }
+
+    function filterByDate(startId, endId) {
+        const startDateInput = document.getElementById(startId).value;
+        const endDateInput = document.getElementById(endId).value;
+        const currentParams = new URLSearchParams(window.location.search);
+
+        const formatDate = (dateString) => {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        };
+
+        currentParams.set("start_date", formatDate(startDateInput));
+        currentParams.set("end_date", formatDate(endDateInput));
+
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+
+        window.location.replace(newUrl);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setDatesRanges("start-date", "end-date");
+
+        document.getElementById('start-date').addEventListener('change', () => filterByDate("start-date", "end-date"));
+        document.getElementById('end-date').addEventListener('change', () => filterByDate("start-date", "end-date"));
+    });
+</script>
+{% endblock %}

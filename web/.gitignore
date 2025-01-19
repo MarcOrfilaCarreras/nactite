@@ -1,0 +1,9 @@
+# Python
+.pytest_cache/
+.venv/
+__pycache__/
+
+# Development
+cache.db
+logs.txt
+requests.log
