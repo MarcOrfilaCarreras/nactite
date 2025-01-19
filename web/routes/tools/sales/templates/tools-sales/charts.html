@@ -154,7 +154,7 @@
         {% endif %}
     {% endfor %}
 
-    {% if month_entry["columns"] | length > 0 %}
+    {% if month_entry["columns"] | length > 0 or areas_sales[key][deafult_area].ventas > 0 %}
         {% set x = processed.bars.append(month_entry) %}
     {% endif %}
 {% endfor %}
