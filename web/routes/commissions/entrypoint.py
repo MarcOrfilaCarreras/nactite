@@ -53,8 +53,7 @@ def calculate_commissions_2024(start_date, end_date, client):
 
     third_party_accesories_ratio = (
         area_sales['ventas_accesorios_3pp'] / area_sales['ventas']) * 100 if area_sales['ventas'] != 0 else 0
-    third_party_accesories_vendor_commissions = vendor_sales['ventas_accesorios_3pp'] / \
-        1.21 if third_party_accesories_ratio >= 10 else 0
+    third_party_accesories_vendor_commissions = (vendor_sales['ventas_accesorios_3pp'] / 1.21) * 0.02 if third_party_accesories_ratio >= 10 else 0
 
     def get_rate(product):
         if area_growth > 10:
