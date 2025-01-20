@@ -2,10 +2,21 @@
 
 {% from 'components/navbar/navbar.html' import navbar %}
 {% from 'icons/actions/open.html' import open %}
+{% from 'icons/spinner.html' import spinner %}
 
 {% block page %}
 <div class="flex h-screen bg-gray-100 font-sans">
     {{ navbar() }}
+
+    <div id="loading-spinner" class="absolute left-0 top-0 h-full w-full z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="relative flex flex-col items-center gap-4">
+            {{ spinner() }}
+            <p class="text-white font-semibold text-2xl">Loading</p>
+            <div class="h-20 flex items-center justify-center">
+                <p id="loading-spinner-fact" class="text-white/90 text-center text-sm max-w-xs"></p>
+            </div>
+        </div>
+    </div>
 
     <div class="flex-1 flex flex-col overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
@@ -33,5 +44,29 @@
     closeSidebarButton.addEventListener('click', () => {
         sidebar.classList.add('-translate-x-full');
     });
+
+    const facts = [
+        "Intecat's favorite fruit is obviously the apple 🍏🍎.",
+        "Intecat employees dream in Retina display resolution 🌈🖥️.",
+        "Intecat has a sixth sense for spotting liquid damage 💧👃.",
+        "Intecat's biggest flex: they can tell you your battery health just by looking at your phone 🔋👀.",
+        "Intecat employees can recognize every Apple product by the sound it makes when it powers on 🔊🍎.",
+        "Intecat's customer service is so good, even their automated messages feel personal 🤝🤖.",
+    ];
+
+    window.addEventListener('beforeunload', (event) => {
+        const spinner = document.getElementById('loading-spinner');
+        const fact = document.getElementById('loading-spinner-fact');
+
+        spinner.classList.remove('hidden');
+        spinner.style.width = window.innerWidth + 'px';
+
+        fact.textContent = facts[Math.floor(Math.random() * facts.length)];
+    });
+
+    window.onresize = function() {
+        const spinner = document.getElementById('loading-spinner');
+        spinner.style.width = window.innerWidth + 'px';
+    };
 </script>
 {% endblock %}
