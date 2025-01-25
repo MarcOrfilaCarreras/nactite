@@ -7,7 +7,8 @@ setup(
     include_package_data = True,
     install_requires = [
         'beautifulsoup4',
-        'requests'
+        'requests',
+        'Unidecode'
     ],
     author = 'Nactite',
     author_email = '',

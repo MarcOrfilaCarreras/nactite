@@ -2,6 +2,7 @@ import datetime
 from typing import Any
 from typing import List
 from typing import Optional
+from unidecode import unidecode
 
 import requests
 
@@ -78,7 +79,7 @@ class Client:
             raise ValueError(
                 'Limit content must be a non-empty integer.')
 
-        params = {'query': f'Intecat iStore {name}', 'limit': f'{limit}'}
+        params = {'query': f'Intecat iStore {unidecode(name)}', 'limit': f'{limit}'}
 
         response = self.request_handler.get(
             url=endpoints.SEARCH_ENDPOINT, params=params, cache=True, cache_table='reviews_request_cache')
