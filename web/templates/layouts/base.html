@@ -54,7 +54,9 @@
         "Intecat's customer service is so good, even their automated messages feel personal 🤝🤖.",
     ];
 
-    window.addEventListener('beforeunload', (event) => {
+
+    function showSpinner() {
+        console.log("showSpinner called");
         const spinner = document.getElementById('loading-spinner');
         const fact = document.getElementById('loading-spinner-fact');
 
@@ -62,7 +64,21 @@
         spinner.style.width = window.innerWidth + 'px';
 
         fact.textContent = facts[Math.floor(Math.random() * facts.length)];
-    });
+
+        console.log("showSpinner completed");
+    }
+
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isSafari) {
+        window.addEventListener('unload', function () {
+            showSpinner();
+        });
+    } else {
+        window.addEventListener('beforeunload', function () {
+            showSpinner();
+        });
+    }
 
     window.onresize = function() {
         const spinner = document.getElementById('loading-spinner');
