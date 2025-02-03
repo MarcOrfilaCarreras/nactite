@@ -8,7 +8,8 @@
 <div class="flex h-screen bg-gray-100 font-sans">
     {{ navbar() }}
 
-    <div id="loading-spinner" class="absolute left-0 top-0 h-full w-full z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden">
+    <div id="loading-spinner"
+        class="absolute left-0 top-0 h-full w-full z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center hidden">
         <div class="relative flex flex-col items-center gap-4">
             {{ spinner() }}
             <p class="text-white font-semibold text-2xl">Loading</p>
@@ -71,8 +72,23 @@
     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
     if (isSafari) {
-        window.addEventListener('unload', function () {
-            showSpinner();
+        document.querySelectorAll("li a").forEach(function (anchor) {
+            anchor.addEventListener("click", function () {
+                showSpinner();
+            });
+        });
+
+        document.querySelectorAll("input[type='date']").forEach(function (input) {
+            input.addEventListener("change", function () {
+                this.blur();
+                showSpinner();
+            });
+        });
+
+        document.querySelectorAll('[id*="Dropdown-items"] li button').forEach(function (button) {
+            button.addEventListener("click", function () {
+                showSpinner();
+            });
         });
     } else {
         window.addEventListener('beforeunload', function () {
@@ -80,7 +96,7 @@
         });
     }
 
-    window.onresize = function() {
+    window.onresize = function () {
         const spinner = document.getElementById('loading-spinner');
         spinner.style.width = window.innerWidth + 'px';
     };
